@@ -1,9 +1,10 @@
+import os
 import csv
 import re
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
 
-TOKEN = "import os
+
 TOKEN = os.getenv("BOT_TOKEN")
 
 pattern = re.compile(r"(\d+)-(\d+)")
