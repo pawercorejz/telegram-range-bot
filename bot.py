@@ -1,5 +1,4 @@
 import os
-import csv
 import tempfile
 from telegram import Update
 from telegram.ext import (
@@ -12,13 +11,13 @@ from telegram.ext import (
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-MAX_COUNT = 100_000  # максимум номеров за один файл
+MAX_COUNT = 100_000
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "🔥 Я ГОТОВ — кидай свои диапазоны!\n\n"
-        "Формат:\n"
+        "🔥 Я ГОТОВ — кидай диапазоны!\n\n"
+        "Пример:\n"
         "74965360000-74965369999"
     )
 
@@ -28,7 +27,7 @@ async def handle_range(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if "-" not in text:
         await update.message.reply_text(
-            "❌ Нужен формат:\n74965360000-74965369999"
+            "❌ Формат:\n74965360000-74965369999"
         )
         return
 
@@ -40,8 +39,7 @@ async def handle_range(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     except:
         await update.message.reply_text(
-            "❌ Ошибка формата.\n\n"
-            "Пример:\n74965360000-74965369999"
+            "❌ Ошибка формата."
         )
         return
 
@@ -55,36 +53,37 @@ async def handle_range(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if count > MAX_COUNT:
         await update.message.reply_text(
-            f"❌ Слишком большой диапазон: {count} номеров.\n"
-            f"Максимум за раз: {MAX_COUNT}."
+            f"❌ Слишком большой диапазон.\n"
+            f"Максимум: {MAX_COUNT}"
         )
         return
 
     filename = f"{start_num}_{end_num}.csv"
     file_path = os.path.join(tempfile.gettempdir(), filename)
 
-    # Создаем CSV построчно
-    with open(file_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
+    # СУПЕР БЫСТРАЯ запись
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(
+            "\n".join(
+                str(number)
+                for number in range(start_num, end_num + 1)
+            )
+        )
 
-        for number in range(start_num, end_num + 1):
-            writer.writerow([number])
-
-    # Отправляем файл
+    # Отправка файла
     with open(file_path, "rb") as file:
         await update.message.reply_document(
             document=file,
             filename=filename,
-            caption=f"✅ Готово.\nДиапазон: {start_num}-{end_num}\nКоличество: {count}"
+            caption=f"✅ Готово\n📦 {count} номеров"
         )
 
-    # Удаляем временный файл
     os.remove(file_path)
 
 
 def main():
     if not BOT_TOKEN:
-        raise ValueError("BOT_TOKEN не найден в переменных окружения")
+        raise ValueError("BOT_TOKEN не найден")
 
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
@@ -96,10 +95,11 @@ def main():
         )
     )
 
-    print("Бот запущен...")
+    print("🚀 Бот запущен")
 
     app.run_polling()
 
 
 if __name__ == "__main__":
     main()
+    
