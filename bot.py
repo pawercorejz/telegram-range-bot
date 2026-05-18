@@ -1,4 +1,4 @@
-import os
+import o
 import csv
 import tempfile
 from telegram import Update
