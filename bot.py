@@ -1,5 +1,7 @@
 import os
+import random
 import tempfile
+
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -61,13 +63,16 @@ async def handle_range(update: Update, context: ContextTypes.DEFAULT_TYPE):
     filename = f"{start_num}_{end_num}.csv"
     file_path = os.path.join(tempfile.gettempdir(), filename)
 
-    # СУПЕР БЫСТРАЯ запись
+    # Создаем список номеров
+    numbers = list(range(start_num, end_num + 1))
+
+    # Перемешиваем случайным образом
+    random.shuffle(numbers)
+
+    # Быстрая запись в файл
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(
-            "\n".join(
-                str(number)
-                for number in range(start_num, end_num + 1)
-            )
+            "\n".join(str(number) for number in numbers)
         )
 
     # Отправка файла
@@ -78,6 +83,7 @@ async def handle_range(update: Update, context: ContextTypes.DEFAULT_TYPE):
             caption=f"✅ Готово\n📦 {count} номеров"
         )
 
+    # Удаляем временный файл
     os.remove(file_path)
 
 
@@ -88,6 +94,7 @@ def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
+
     app.add_handler(
         MessageHandler(
             filters.TEXT & ~filters.COMMAND,
@@ -102,4 +109,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
